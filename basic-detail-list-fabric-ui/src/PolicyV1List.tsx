@@ -2,25 +2,34 @@ import * as React from 'react';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Fabric, DetailsList, IColumn, Selection, SelectionMode } from 'office-ui-fabric-react';
 
+const controlStyles = {
+    root: {
+      margin: '0 30px 20px 0',
+      maxWidth: '300px'
+    }
+};
+
 interface IPolicy {
     name: string;
     id: number;
 }
 
-interface IPolicyListState {
+interface IPolicyV1ListState {
     listItems: IPolicy[];
     columns: IColumn[];
 }
 
-class PolicyList extends React.Component<{}, IPolicyListState> {
+class PolicyV1List extends React.Component<{}, IPolicyV1ListState> {
+    
+    private _listItems: IPolicy[];
 
     constructor(props: {}) {
         super(props);
-        const listItems = _generatePolicyItems();
+        this._listItems = _generatePolicyItems();
         const columns: IColumn[] = _generateColumns();
         this.state = {
             columns: columns,
-            listItems: listItems
+            listItems: this._listItems
         }
     }
     
@@ -28,16 +37,25 @@ class PolicyList extends React.Component<{}, IPolicyListState> {
         const {listItems, columns} = this.state;
         return (
             <Fabric>
+                <TextField label="Filter by name:" onChange={this._onChangeText} styles={controlStyles} />
+                <br/>
                 <DetailsList columns = {columns}
                               items = {listItems}
-                              selectionMode= {SelectionMode.none}
+                              selectionMode = {SelectionMode.single}
+                              compact={false}
                 />
             </Fabric>
         );
     }
+
+    private _onChangeText = (ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string): void => {
+        this.setState({
+            listItems: newValue ? this._listItems.filter(i => i.name.toLowerCase().indexOf(newValue) > -1) : this._listItems
+        });
+      };
 }
 
-export default PolicyList;
+export default PolicyV1List;
 
 /* helper methods */
 
